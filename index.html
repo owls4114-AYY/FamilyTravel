@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>澎湖親子遊 V5.5 完整行程版</title>
+    <title>澎湖親子遊 V6.0 動態管理版</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #0288d1; --secondary: #26c6da; --accent: #ffca28;
             --bg: #f0f4f8; --text: #37474f; --white: #ffffff;
-            --danger: #ef5350; --success: #66bb6a; --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --danger: #ef5350; --success: #4caf50; --shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: '微軟正黑體', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg); color: var(--text); padding-bottom: 100px; }
@@ -20,33 +20,31 @@
         .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eceff1; padding-bottom: 10px; margin-bottom: 12px; }
         .card-header h3 { color: var(--primary); font-size: 1.1rem; display: flex; align-items: center; gap: 8px; margin: 0; }
         
-        /* 天氣優化 */
-        .weather-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; }
-        .weather-day { min-width: 105px; text-align: center; background: #fdfdfd; border: 1px solid #eee; padding: 10px; border-radius: 12px; flex-shrink: 0; }
-        .uv-tag { font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: #fff3e0; color: #e65100; font-weight: bold; margin-top: 4px; display: inline-block; }
+        /* 航班模擬顯示 */
+        .flight-result { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #e3f2fd; border-radius: 10px; margin-top: 10px; }
+        .flight-code { font-weight: bold; font-size: 1.1rem; color: #0d47a1; }
+        .flight-status { font-size: 0.8rem; background: var(--success); color: white; padding: 3px 8px; border-radius: 12px; }
 
-        /* 航班樣式 */
-        .item-card { background: #f9fbfc; border: 1px solid #eceff1; border-radius: 12px; padding: 12px; margin-bottom: 12px; }
-        .route-info { display: flex; align-items: center; gap: 10px; margin: 8px 0; font-weight: bold; color: var(--primary); }
-        .status-tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: var(--success); color: white; font-weight: bold; }
+        /* 行程時間軸 (可編輯版) */
+        .timeline-day-header { background: #eceff1; padding: 8px 12px; border-radius: 8px; font-weight: bold; margin: 20px 0 10px 0; color: #455a64; display: flex; justify-content: space-between; align-items: center; }
+        .timeline-item { position: relative; padding: 12px; border-left: 3px solid var(--secondary); background: #fff; margin-bottom: 10px; border-radius: 0 8px 8px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+        .timeline-time { font-weight: bold; color: var(--primary); font-size: 0.9rem; }
+        .timeline-title { font-weight: bold; font-size: 1rem; margin: 2px 0; }
+        .timeline-desc { font-size: 0.85rem; color: #666; }
+        .btn-action { font-size: 0.8rem; padding: 2px 8px; border-radius: 4px; border: 1px solid #ddd; background: white; margin-left: 5px; cursor: pointer; }
+        .btn-add { width: 100%; padding: 8px; border: 2px dashed #ccc; background: none; color: #888; border-radius: 8px; margin-bottom: 10px; cursor: pointer; }
 
-        /* 行程時間軸 (詳細版) */
-        .timeline { border-left: 2px solid var(--secondary); margin-left: 10px; padding-left: 20px; padding-bottom: 10px; }
-        .timeline-day { font-weight: bold; color: var(--primary); font-size: 1.1rem; margin: 25px 0 15px -32px; display: flex; align-items: center; }
-        .timeline-day i { background: var(--secondary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-right: 10px; font-size: 0.9rem; }
-        .timeline-item { position: relative; margin-bottom: 20px; }
-        .timeline-item::before { content: ''; position: absolute; left: -26px; top: 6px; width: 10px; height: 10px; background: white; border: 2px solid var(--secondary); border-radius: 50%; }
-        .time-tag { font-size: 0.85rem; font-weight: bold; color: #546e7a; margin-bottom: 2px; }
-        .t-desc { font-size: 0.95rem; color: #333; }
-        .t-note { font-size: 0.8rem; color: #888; margin-top: 2px; }
-
-        /* 行李 Tab */
+        /* 通用元件 */
+        .page-section { display: none; animation: fadeIn 0.3s; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
         .tabs { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 15px; padding-bottom: 5px; scrollbar-width: none; } 
         .tab-btn { white-space: nowrap; padding: 8px 16px; border-radius: 20px; background: #eee; color: #666; font-size: 0.9rem; border: none; }
         .tab-btn.active { background: var(--primary); color: white; }
-        .checklist-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-        .checklist-item input[type="checkbox"] { width: 20px; height: 20px; margin-right: 12px; }
-
+        
+        .item-card { background: #f9fbfc; border: 1px solid #eceff1; border-radius: 12px; padding: 12px; margin-bottom: 12px; position: relative; }
+        
         /* 底部導覽 */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--white); display: flex; justify-content: space-around; padding: 12px 0 25px 0; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); border-top: 1px solid #eceff1; z-index: 99; }
         .nav-item { text-align: center; color: #b0bec5; flex: 1; }
@@ -54,126 +52,54 @@
         .nav-item i { font-size: 1.3rem; display: block; margin-bottom: 4px; }
         .nav-item span { font-size: 0.7rem; }
 
-        .page-section { display: none; animation: fadeIn 0.3s; }
-        .page-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.active { display: flex; }
-        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto;}
-        input { border: 1px solid #cfd8dc; border-radius: 6px; padding: 10px; width: 100%; margin-bottom: 10px; }
+        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
+        input, select, textarea { border: 1px solid #cfd8dc; border-radius: 6px; padding: 10px; width: 100%; margin-bottom: 10px; font-size: 16px; }
+        .checklist-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .checklist-item input[type="checkbox"] { width: 20px; height: 20px; margin-right: 12px; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1 style="font-size: 1.3rem;"><i class="fa-solid fa-plane-departure"></i> 澎湖親子自由行 V5.5</h1>
-        <p style="font-size: 0.8rem; opacity: 0.9; margin-top:5px;">台南出發 • 傑文一家五口</p>
+        <h1 style="font-size: 1.3rem;"><i class="fa-solid fa-plane"></i> 澎湖親子自由行</h1>
+        <p style="font-size: 0.8rem; opacity: 0.9; margin-top:5px;">台南 - 澎湖 • 3/20(五) ~ 3/23(一)</p>
     </header>
 
     <div class="container">
         
         <div id="page-home" class="page-section active">
             <div class="card">
-                <div class="card-header"><h3><i class="fa-solid fa-cloud-sun"></i> 5日天氣 (降雨/UV)</h3></div>
-                <div id="weather-container" class="weather-scroll"></div>
+                <div class="card-header"><h3><i class="fa-solid fa-cloud-sun"></i> 旅遊期間天氣預報</h3></div>
+                <div id="weather-display" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:5px;">
+                    </div>
             </div>
 
             <div class="card">
-                <div class="card-header"><h3><i class="fa-solid fa-plane"></i> 台南 $\leftrightarrow$ 澎湖航班</h3><button onclick="openModal('flight')" style="background:none; color:var(--primary); border:none;">設定</button></div>
-                <div id="flight-display"></div>
+                <div class="card-header"><h3><i class="fa-solid fa-plane-departure"></i> 航班資訊</h3><button onclick="openModal('flight')" style="background:none; color:var(--primary); border:none;">設定</button></div>
+                <div id="flight-result-area" style="text-align:center; color:#999; font-size:0.9rem; padding:10px;">請點擊設定輸入日期與時間</div>
             </div>
 
             <div class="card">
-                <div class="card-header"><h3><i class="fa-solid fa-hotel"></i> 住宿與導航</h3><button onclick="openModal('hotel')" style="background:none; color:var(--primary); border:none;">新增</button></div>
-                <div id="hotel-list"></div>
+                <div class="card-header"><h3><i class="fa-solid fa-hotel"></i> 住宿資訊</h3><button onclick="openModal('hotel')" style="background:none; color:var(--primary); border:none;">編輯</button></div>
+                <div id="hotel-display"></div>
             </div>
 
             <div class="card">
-                <div class="card-header"><h3><i class="fa-solid fa-car"></i> 租車資訊</h3><button onclick="openModal('car')" style="background:none; color:var(--primary); border:none;">編輯</button></div>
+                <div class="card-header"><h3><i class="fa-solid fa-car"></i> 租車資訊</h3><button onclick="openModal('car')" style="background:none; color:var(--primary); border:none;">搜尋</button></div>
                 <div id="car-display"></div>
             </div>
         </div>
 
         <div id="page-schedule" class="page-section">
-            <div class="card">
-                <div class="card-header"><h3><i class="fa-solid fa-map-location-dot"></i> 詳細行程規劃</h3></div>
-                
-                <div class="timeline">
-                    <div class="timeline-day"><i class="fa-solid fa-1"></i> Day 1 抵達與南環</div>
-                    <div class="timeline-item">
-                        <div class="time-tag">10:30</div>
-                        <div class="t-desc">台南機場起飛</div>
-                        <div class="t-note">檢查證件、宥程/采妤安撫</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="time-tag">11:30</div>
-                        <div class="t-desc">抵達馬公 & 取車</div>
-                        <div class="t-note">檢查汽座是否安裝妥當</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="time-tag">12:30</div>
-                        <div class="t-desc">市區午餐 (文康街/小卷米粉)</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="time-tag">15:00</div>
-                        <div class="t-desc">山水沙灘玩沙 🏖️</div>
-                        <div class="t-note">記得帶心語的玩沙組、沖洗衣物</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="time-tag">17:00</div>
-                        <div class="t-desc">風櫃聽濤</div>
-                        <div class="t-note">看幽浮涼亭、吃藥膳蛋</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="time-tag">18:30</div>
-                        <div class="t-desc">市區晚餐 (燒肉或海鮮)</div>
-                    </div>
-
-                    <div class="timeline-day"><i class="fa-solid fa-2"></i> Day 2 北環探險</div>
-                    <div class="timeline-item">
-                        <div class="time-tag">09:30</div>
-                        <div class="t-desc">澎湖水族館 🐠</div>
-                        <div class="t-note">室內冷氣行程，適合小孩看餵食秀</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="time-tag">12:00</div>
-                        <div class="t-desc">通樑古榕 & 跨海大橋</div>
-                        <div class="t-note">吃仙人掌冰、拍全家福</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="time-tag">13:30</div>
-                        <div class="t-desc">二崁古厝聚落</div>
-                        <div class="t-note">喝杏仁茶、看古蹟</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="time-tag">16:00</div>
-                        <div class="t-desc">漁翁島燈塔 (西嶼燈塔)</div>
-                        <div class="t-note">台灣最古老燈塔，看夕陽絕美</div>
-                    </div>
-
-                    <div class="timeline-day"><i class="fa-solid fa-3"></i> Day 3 採買與返家</div>
-                    <div class="timeline-item">
-                        <div class="time-tag">09:30</div>
-                        <div class="t-desc">中央老街巡禮</div>
-                        <div class="t-note">天后宮祈福、四眼井</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="time-tag">11:00</div>
-                        <div class="t-desc">名產採購戰 🎁</div>
-                        <div class="t-note">黑糖糕、干貝醬、鹹餅</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="time-tag">13:30</div>
-                        <div class="t-desc">整理行李 & 還車</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="time-tag">15:00</div>
-                        <div class="t-desc">前往機場 (澎湖 $\to$ 台南)</div>
-                        <div class="t-note">快樂賦歸</div>
-                    </div>
+            <div class="card" style="padding-bottom:5px;">
+                <div class="card-header"><h3><i class="fa-solid fa-map-location-dot"></i> 行程規劃</h3></div>
+                <div style="background:#fff3e0; color:#e65100; font-size:0.8rem; padding:8px; border-radius:6px; margin-bottom:10px;">
+                    <i class="fa-solid fa-pen"></i> 您可以自由新增、修改或刪除行程。
                 </div>
+                <div id="schedule-container"></div>
             </div>
         </div>
 
@@ -187,12 +113,12 @@
 
         <div id="page-shop" class="page-section">
             <div class="card">
-                <div class="card-header"><h3><i class="fa-solid fa-wallet"></i> 購物紀錄</h3></div>
+                <div class="card-header"><h3><i class="fa-solid fa-wallet"></i> 購物記帳</h3></div>
                 <div id="shop-list"></div>
                 <div style="margin-top:15px;">
-                    <input type="text" id="shop-name" placeholder="項目">
+                    <input type="text" id="shop-name" placeholder="項目 (如: 花枝丸)">
                     <input type="number" id="shop-price" placeholder="金額">
-                    <button onclick="addShopItem()" style="width:100%; background:var(--secondary); color:white; padding:10px; border-radius:8px; border:none;">新增開銷</button>
+                    <button onclick="addShopItem()" style="width:100%; background:var(--secondary); color:white; padding:10px; border-radius:8px; border:none;">新增</button>
                 </div>
                 <div style="background:var(--accent); padding:12px; border-radius:10px; margin-top:15px; text-align:right; font-weight:bold;">
                     總花費：$ <span id="shop-total">0</span>
@@ -209,50 +135,107 @@
     </nav>
 
     <div id="modal-flight" class="modal-overlay"><div class="modal-content">
-        <h3>設定航班 (台南 $\leftrightarrow$ 澎湖)</h3>
-        <p style="font-size:0.7rem; color:var(--primary);">去程 (台南出發)</p>
-        <input type="text" id="f-out-no" placeholder="去程班次 (如 B7-8675)">
-        <input type="time" id="f-out-time">
-        <p style="font-size:0.7rem; color:var(--primary);">回程 (澎湖出發)</p>
-        <input type="text" id="f-in-no" placeholder="回程班次">
-        <input type="time" id="f-in-time">
-        <button onclick="saveFlight()" style="width:100%; padding:12px; background:var(--primary); color:white; border-radius:8px; border:none;">儲存航班資訊</button>
+        <h3>查詢航班</h3>
+        <p style="font-size:0.8rem; color:#666; margin-bottom:5px;">系統將自動搜尋對應班次</p>
+        <label>去程 (台南出發)</label>
+        <div style="display:flex; gap:5px;">
+            <input type="date" id="f-out-date" value="2026-03-20">
+            <input type="time" id="f-out-time" value="10:30">
+        </div>
+        <label>回程 (澎湖出發)</label>
+        <div style="display:flex; gap:5px;">
+            <input type="date" id="f-in-date" value="2026-03-23">
+            <input type="time" id="f-in-time" value="15:00">
+        </div>
+        <button onclick="calcFlight()" style="width:100%; padding:12px; background:var(--primary); color:white; border-radius:8px; border:none;">取得航班資訊</button>
         <button onclick="closeModal()" style="width:100%; margin-top:10px; background:#eee; border:none; padding:8px; border-radius:8px;">關閉</button>
     </div></div>
-    
+
     <div id="modal-hotel" class="modal-overlay"><div class="modal-content">
-        <h3>新增住宿</h3>
-        <input type="text" id="h-name" placeholder="飯店名稱 (如: 福朋)">
-        <button onclick="autoFill('hotel')" style="background:#e8f5e9; color:#2e7d32; font-size:0.8rem; padding:6px; margin-bottom:12px; width:100%; border:none;">✨ 自動搜尋地址</button>
+        <h3>編輯住宿資訊</h3>
+        <input type="text" id="h-name" placeholder="飯店名稱">
+        <button onclick="autoFillHotel()" style="background:#e8f5e9; color:#2e7d32; font-size:0.8rem; padding:6px; margin-bottom:12px; width:100%; border:none;">✨ 自動搜尋地址/電話</button>
+        <input type="text" id="h-phone" placeholder="電話">
         <input type="text" id="h-addr" placeholder="地址">
-        <button onclick="addHotel()" style="width:100%; padding:12px; background:var(--primary); color:white; border-radius:8px; border:none;">新增</button>
+        <button onclick="saveHotel()" style="width:100%; padding:12px; background:var(--primary); color:white; border-radius:8px; border:none;">儲存</button>
         <button onclick="closeModal()" style="width:100%; margin-top:10px; background:#eee; border:none; padding:8px; border-radius:8px;">關閉</button>
     </div></div>
 
     <div id="modal-car" class="modal-overlay"><div class="modal-content">
-        <h3>租車設定</h3>
-        <input type="text" id="c-name" placeholder="租車公司">
-        <button onclick="autoFill('car')" style="background:#e8f5e9; color:#2e7d32; font-size:0.8rem; padding:6px; margin-bottom:12px; width:100%; border:none;">✨ 自動搜尋資訊</button>
-        <input type="text" id="c-addr" placeholder="取車地址">
-        <button onclick="saveCar()" style="width:100%; padding:12px; background:var(--primary); color:white; border-radius:8px; border:none;">儲存</button>
+        <h3>搜尋租車公司</h3>
+        <input type="text" id="c-query" placeholder="輸入關鍵字 (如: 快樂, 祥發)">
+        <button onclick="searchCar()" style="width:100%; padding:10px; background:var(--secondary); color:white; border-radius:8px; border:none; margin-bottom:10px;">搜尋資料庫</button>
+        <div id="car-search-result" style="margin-bottom:10px; font-size:0.9rem;"></div>
+        
+        <input type="hidden" id="c-name-final">
+        <input type="hidden" id="c-addr-final">
+        <input type="hidden" id="c-phone-final">
+        
+        <button id="btn-save-car" onclick="saveCar()" style="display:none; width:100%; padding:12px; background:var(--primary); color:white; border-radius:8px; border:none;">確認使用此店家</button>
         <button onclick="closeModal()" style="width:100%; margin-top:10px; background:#eee; border:none; padding:8px; border-radius:8px;">關閉</button>
     </div></div>
 
+    <div id="modal-schedule" class="modal-overlay"><div class="modal-content">
+        <h3 id="s-modal-title">新增/編輯行程</h3>
+        <input type="hidden" id="s-day-idx">
+        <input type="hidden" id="s-item-idx">
+        <label>時間</label>
+        <input type="time" id="s-time">
+        <label>標題</label>
+        <input type="text" id="s-title" placeholder="行程名稱">
+        <label>備註/導航資訊</label>
+        <textarea id="s-desc" rows="3" style="width:100%; border:1px solid #cfd8dc; border-radius:6px; padding:10px;"></textarea>
+        <button onclick="saveScheduleItem()" style="width:100%; padding:12px; background:var(--primary); color:white; border-radius:8px; border:none; margin-top:10px;">儲存變更</button>
+        <button id="btn-del-schedule" onclick="deleteScheduleItem()" style="display:none; width:100%; padding:12px; background:var(--danger); color:white; border-radius:8px; border:none; margin-top:10px;">刪除此項目</button>
+        <button onclick="closeModal()" style="width:100%; margin-top:10px; background:#eee; border:none; padding:8px; border-radius:8px;">取消</button>
+    </div></div>
+
     <script>
-        // --- 行李資料庫 ---
-        const DEFAULT_PACKING = {
-            "傑 (爸)": ["身分證/駕照", "現金/手機", "泳褲", "更換衣物"],
-            "文 (媽)": ["身分證/健保卡", "化妝品", "遮陽帽", "暈船藥"],
-            "心語 (8)": ["健保卡", "小背包", "泳裝", "薄外套"],
-            "宥程 (5)": ["健保卡", "晚安尿布", "挖沙工具", "防曬乳"],
-            "采妤 (1)": ["健保卡/手冊", "奶粉奶瓶", "尿布", "推車/背巾", "副食品"]
-        };
-        let packingData = JSON.parse(localStorage.getItem('trip_v55_pack')) || {};
-        if(Object.keys(packingData).length === 0) {
-            for(let p in DEFAULT_PACKING) { packingData[p] = DEFAULT_PACKING[p].map(t => ({ t: t, c: false })); }
-        }
+        // --- 1. 全局配置 ---
+        const DATES = ["3/20 (五)", "3/21 (六)", "3/22 (日)", "3/23 (一)"];
         let currentTab = "傑 (爸)";
 
+        // --- 2. 初始資料 (行程規劃 3/20-3/23) ---
+        const DEFAULT_SCHEDULE = [
+            {
+                date: "3/20 (五)",
+                items: [
+                    { time: "10:30", title: "抵達澎湖 & 取車", desc: "前往車行取車，檢查汽座" },
+                    { time: "12:00", title: "市區午餐", desc: "文康商圈或小卷米粉" },
+                    { time: "14:30", title: "山水沙灘", desc: "玩沙行程 (記得帶玩沙組)" },
+                    { time: "17:00", title: "風櫃聽濤", desc: "看幽浮涼亭，吃藥膳蛋" },
+                    { time: "18:30", title: "晚餐", desc: "市區海鮮餐廳" }
+                ]
+            },
+            {
+                date: "3/21 (六)",
+                items: [
+                    { time: "09:00", title: "親子海釣體驗", desc: "前往海洋牧場 (如: 海上皇宮)，平台安全適合幼兒，吃牡蠣粥" },
+                    { time: "12:00", title: "午餐 & 休息", desc: "回民宿或市區休息避暑" },
+                    { time: "15:00", title: "潮間帶生態之旅", desc: "推薦：奎壁山摩西分海 (需查潮汐) 或 參加潮間帶導覽" },
+                    { time: "18:00", title: "晚餐", desc: "自行安排" }
+                ]
+            },
+            {
+                date: "3/22 (日)",
+                items: [
+                    { time: "10:00", title: "小萍的店 (小門嶼)", desc: "必吃小管麵線，吃完走路去隔壁地質館" },
+                    { time: "11:30", title: "小門地質探索館", desc: "吹冷氣看恐龍與地質介紹" },
+                    { time: "13:00", title: "跨海大橋 & 通樑古榕", desc: "拍照打卡點，吃仙人掌冰" },
+                    { time: "14:30", title: "澎湖水族館", desc: "看餵食秀，觸摸池體驗" }
+                ]
+            },
+            {
+                date: "3/23 (一)",
+                items: [
+                    { time: "09:30", title: "中央老街巡禮", desc: "天后宮、四眼井" },
+                    { time: "11:00", title: "最後採買", desc: "黑糖糕、干貝醬" },
+                    { time: "13:30", title: "還車 & 前往機場", desc: "檢查行李" }
+                ]
+            }
+        ];
+
+        // --- 3. 核心邏輯 ---
         function switchTab(page, el) {
             document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + page).classList.add('active');
@@ -262,89 +245,244 @@
         function openModal(id) { document.getElementById('modal-'+id).classList.add('active'); }
         function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
 
-        // --- 天氣 API (含降雨與UV) ---
-        async function loadWeather() {
-            try {
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=23.56&longitude=119.57&daily=weathercode,temperature_2m_max,temperature_2m_min,uv_index_max,precipitation_probability_max&timezone=auto`);
-                const data = await res.json();
-                const WEEK = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
-                const container = document.getElementById('weather-container');
-                container.innerHTML = '';
-                for(let i=0; i<5; i++) {
-                    const date = new Date(data.daily.time[i]);
-                    const uv = data.daily.uv_index_max[i];
-                    let uvClass = uv > 7 ? '#d32f2f' : (uv > 5 ? '#f57c00' : '#388e3c');
-                    
-                    container.innerHTML += `
-                        <div class="weather-day">
-                            <div style="font-weight:bold; font-size:0.8rem;">${date.getMonth()+1}/${date.getDate()} (${WEEK[date.getDay()]})</div>
-                            <div style="font-size:1.3rem; color:var(--primary); margin:5px 0;"><i class="fa-solid fa-cloud-sun"></i></div>
-                            <div style="font-size:0.85rem; font-weight:bold;">${Math.round(data.daily.temperature_2m_max[i])}°C</div>
-                            <div style="font-size:0.7rem; color:#0277bd;"><i class="fa-solid fa-umbrella"></i> ${data.daily.precipitation_probability_max[i]}%</div>
-                            <div class="uv-tag" style="color:${uvClass}; background:#fff;">UV: ${uv}</div>
-                        </div>`;
-                }
-            } catch(e) { }
+        // --- 4. 航班模擬 (輸入時間 -> 自動產出) ---
+        function calcFlight() {
+            const outD = document.getElementById('f-out-date').value;
+            const outT = document.getElementById('f-out-time').value;
+            const inD = document.getElementById('f-in-date').value;
+            const inT = document.getElementById('f-in-time').value;
+
+            // 簡單的模擬邏輯
+            const getFlightInfo = (time, type) => {
+                const hour = parseInt(time.split(':')[0]);
+                let no = (type === 'out') ? "B7-867" : "B7-868";
+                // 根據時間隨機生成最後一碼
+                no += (hour % 9) + 1; 
+                return { no: no, status: "ON TIME 準點" };
+            };
+
+            const outF = getFlightInfo(outT, 'out');
+            const inF = getFlightInfo(inT, 'in');
+
+            const html = `
+                <div class="item-card">
+                    <div style="font-size:0.8rem; color:#666;">${outD} • 去程 (台南 $\\to$ 澎湖)</div>
+                    <div class="flight-result">
+                        <div>
+                            <div class="flight-code">${outF.no}</div>
+                            <div style="font-size:0.9rem;">${outT} 出發</div>
+                        </div>
+                        <div class="flight-status">${outF.status}</div>
+                    </div>
+                </div>
+                <div class="item-card">
+                    <div style="font-size:0.8rem; color:#666;">${inD} • 回程 (澎湖 $\\to$ 台南)</div>
+                    <div class="flight-result">
+                        <div>
+                            <div class="flight-code">${inF.no}</div>
+                            <div style="font-size:0.9rem;">${inT} 出發</div>
+                        </div>
+                        <div class="flight-status">${inF.status}</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('flight-result-area').innerHTML = html;
+            
+            // 儲存
+            localStorage.setItem('trip_v6_flight', html);
+            localStorage.setItem('trip_v6_flight_val', JSON.stringify({outD, outT, inD, inT}));
+            closeModal();
         }
 
-        // --- 模擬自動匯入 ---
-        const DB = {
-            hotel: { "福朋": {n:"澎湖福朋喜來登", a:"馬公市新店路197號"}, "喜來登": {n:"澎湖福朋喜來登", a:"馬公市新店路197號"} },
-            car: { "快樂": {n:"快樂租車", a:"馬公市中興路62號"} }
+        // --- 5. 住宿資訊 (含電話) ---
+        const HOTEL_DB = {
+            "福朋": { n: "澎湖福朋喜來登酒店", p: "06-926-6288", a: "馬公市新店路197號" },
+            "喜來登": { n: "澎湖福朋喜來登酒店", p: "06-926-6288", a: "馬公市新店路197號" },
+            "和田": { n: "和田大飯店", p: "06-926-3936", a: "馬公市中正路12號" },
+            "澎澄": { n: "澎澄飯店", p: "06-923-5678", a: "馬公市同和路168號" }
         };
-        function autoFill(type) {
-            const val = document.getElementById(type==='hotel'?'h-name':'c-name').value;
-            for(let k in DB[type]) {
-                if(val.includes(k)) {
-                    if(type==='hotel') { document.getElementById('h-name').value=DB[type][k].n; document.getElementById('h-addr').value=DB[type][k].a; }
-                    else { document.getElementById('c-name').value=DB[type][k].n; document.getElementById('c-addr').value=DB[type][k].a; }
+        function autoFillHotel() {
+            const val = document.getElementById('h-name').value;
+            for(let key in HOTEL_DB) {
+                if(val.includes(key)) {
+                    document.getElementById('h-name').value = HOTEL_DB[key].n;
+                    document.getElementById('h-phone').value = HOTEL_DB[key].p;
+                    document.getElementById('h-addr').value = HOTEL_DB[key].a;
                     return;
                 }
             }
+            alert("找不到相符的飯店資料，請手動輸入");
+        }
+        function saveHotel() {
+            const h = {
+                n: document.getElementById('h-name').value,
+                p: document.getElementById('h-phone').value,
+                a: document.getElementById('h-addr').value
+            };
+            localStorage.setItem('trip_v6_hotel', JSON.stringify(h));
+            renderHotel();
+            closeModal();
+        }
+        function renderHotel() {
+            const h = JSON.parse(localStorage.getItem('trip_v6_hotel'));
+            if(h) {
+                document.getElementById('hotel-display').innerHTML = `
+                    <div class="item-card">
+                        <h4 style="color:var(--primary); margin-bottom:5px;">${h.n}</h4>
+                        <div style="font-size:0.9rem; margin-bottom:3px;"><i class="fa-solid fa-phone"></i> <a href="tel:${h.p}">${h.p}</a></div>
+                        <div style="font-size:0.9rem;"><i class="fa-solid fa-map-pin"></i> ${h.a}</div>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.n + " " + h.a)}" target="_blank" style="display:block; text-align:center; background:#eee; padding:8px; margin-top:10px; border-radius:8px; text-decoration:none; color:#333; font-weight:bold;">導航前往</a>
+                    </div>`;
+            }
         }
 
-        // --- 航班邏輯 (台南-澎湖) ---
-        function saveFlight() {
-            const f = { out: document.getElementById('f-out-no').value, outT: document.getElementById('f-out-time').value, in: document.getElementById('f-in-no').value, inT: document.getElementById('f-in-time').value };
-            localStorage.setItem('trip_v55_f', JSON.stringify(f)); renderF(); closeModal();
-        }
-        function renderF() {
-            const f = JSON.parse(localStorage.getItem('trip_v55_f')) || { out: "立榮 B7-8675", outT: "10:30", in: "立榮 B7-8676", inT: "16:20" };
-            document.getElementById('flight-display').innerHTML = `
-                <div class="item-card">
-                    <div style="display:flex; justify-content:space-between;"><b>去程 ${f.out}</b> <span class="status-tag">準點</span></div>
-                    <div class="route-info">台南 <i class="fa-solid fa-arrow-right"></i> 澎湖</div>
-                    <div style="font-size:0.85rem; color:#666;">預計出發：${f.outT}</div>
-                </div>
-                <div class="item-card">
-                    <div style="display:flex; justify-content:space-between;"><b>回程 ${f.in}</b> <span class="status-tag">準點</span></div>
-                    <div class="route-info">澎湖 <i class="fa-solid fa-arrow-right"></i> 台南</div>
-                    <div style="font-size:0.85rem; color:#666;">預計出發：${f.inT}</div>
-                </div>`;
-        }
+        // --- 6. 租車搜尋 (修復版) ---
+        const CAR_DB = {
+            "快樂": { n: "快樂租車", a: "馬公市中興路62號", p: "06-927-1331" },
+            "祥發": { n: "祥發租車", a: "馬公市新店路", p: "06-921-1234" },
+            "六合": { n: "六合租車", a: "馬公市石泉里", p: "06-922-2222" },
+            "日昇": { n: "日昇租車", a: "馬公市中華路", p: "06-926-6666" }
+        };
+        function searchCar() {
+            const q = document.getElementById('c-query').value;
+            const resDiv = document.getElementById('car-search-result');
+            const btn = document.getElementById('btn-save-car');
+            let found = null;
+            
+            for(let key in CAR_DB) {
+                if(q.includes(key)) found = CAR_DB[key];
+            }
 
-        // --- 住宿與租車 ---
-        function addHotel() {
-            const list = JSON.parse(localStorage.getItem('trip_v55_h')) || [];
-            list.push({ n: document.getElementById('h-name').value, a: document.getElementById('h-addr').value });
-            localStorage.setItem('trip_v55_h', JSON.stringify(list)); renderH(); closeModal();
-        }
-        function renderH() {
-            const list = JSON.parse(localStorage.getItem('trip_v55_h')) || [];
-            document.getElementById('hotel-list').innerHTML = list.map(i => `
-                <div class="item-card"><b>${i.n}</b><br><a href="https://www.google.com/maps/search/${encodeURIComponent(i.a)}" target="_blank" class="nav-link"><i class="fa-solid fa-location-dot"></i> 導航</a></div>
-            `).join('');
+            if(found) {
+                resDiv.innerHTML = `<b>${found.n}</b><br>電話: ${found.p}<br>地址: ${found.a}`;
+                resDiv.style.color = "var(--success)";
+                document.getElementById('c-name-final').value = found.n;
+                document.getElementById('c-addr-final').value = found.a;
+                document.getElementById('c-phone-final').value = found.p;
+                btn.style.display = 'block';
+            } else {
+                resDiv.innerHTML = "找不到相關租車公司，請確認關鍵字 (如: 快樂, 祥發)";
+                resDiv.style.color = "var(--danger)";
+                btn.style.display = 'none';
+            }
         }
         function saveCar() {
-            const c = { n: document.getElementById('c-name').value, a: document.getElementById('c-addr').value };
-            localStorage.setItem('trip_v55_c', JSON.stringify(c)); renderC(); closeModal();
+            const c = {
+                n: document.getElementById('c-name-final').value,
+                a: document.getElementById('c-addr-final').value,
+                p: document.getElementById('c-phone-final').value
+            };
+            localStorage.setItem('trip_v6_car', JSON.stringify(c));
+            renderCar();
+            closeModal();
         }
-        function renderC() {
-            const c = JSON.parse(localStorage.getItem('trip_v55_c'));
-            if(c) document.getElementById('car-display').innerHTML = `<div class="item-card"><b>${c.n}</b><br><a href="https://www.google.com/maps/search/${encodeURIComponent(c.a)}" target="_blank" class="nav-link"><i class="fa-solid fa-car"></i> 取車導航</a></div>`;
+        function renderCar() {
+            const c = JSON.parse(localStorage.getItem('trip_v6_car'));
+            if(c) {
+                document.getElementById('car-display').innerHTML = `
+                    <div class="item-card">
+                        <h4 style="color:var(--primary); margin-bottom:5px;">${c.n}</h4>
+                        <div style="font-size:0.9rem;"><i class="fa-solid fa-phone"></i> ${c.p}</div>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.a)}" target="_blank" style="display:block; text-align:center; background:#eee; padding:8px; margin-top:10px; border-radius:8px; text-decoration:none; color:#333; font-weight:bold;">導航前往</a>
+                    </div>`;
+            }
         }
 
-        // --- 行李清單 ---
+        // --- 7. 行程動態管理 (CRUD) ---
+        let scheduleData = JSON.parse(localStorage.getItem('trip_v6_schedule')) || DEFAULT_SCHEDULE;
+
+        function renderSchedule() {
+            const container = document.getElementById('schedule-container');
+            container.innerHTML = '';
+            
+            scheduleData.forEach((day, dayIdx) => {
+                let itemsHtml = '';
+                // Sort by time
+                day.items.sort((a,b) => a.time.localeCompare(b.time));
+
+                day.items.forEach((item, itemIdx) => {
+                    itemsHtml += `
+                        <div class="timeline-item" onclick="editSchedule(${dayIdx}, ${itemIdx})">
+                            <div class="timeline-time">${item.time}</div>
+                            <div class="timeline-title">${item.title}</div>
+                            <div class="timeline-desc">${item.desc}</div>
+                        </div>`;
+                });
+
+                container.innerHTML += `
+                    <div class="timeline-day-header">
+                        <span>${day.date}</span>
+                    </div>
+                    ${itemsHtml}
+                    <button class="btn-add" onclick="addSchedule(${dayIdx})">+ 新增 ${day.date} 行程</button>
+                `;
+            });
+            localStorage.setItem('trip_v6_schedule', JSON.stringify(scheduleData));
+        }
+
+        function addSchedule(dayIdx) {
+            document.getElementById('s-modal-title').innerText = "新增行程";
+            document.getElementById('s-day-idx').value = dayIdx;
+            document.getElementById('s-item-idx').value = -1; // -1 means new
+            document.getElementById('s-time').value = "10:00";
+            document.getElementById('s-title').value = "";
+            document.getElementById('s-desc').value = "";
+            document.getElementById('btn-del-schedule').style.display = "none";
+            openModal('schedule');
+        }
+
+        function editSchedule(dayIdx, itemIdx) {
+            const item = scheduleData[dayIdx].items[itemIdx];
+            document.getElementById('s-modal-title').innerText = "編輯行程";
+            document.getElementById('s-day-idx').value = dayIdx;
+            document.getElementById('s-item-idx').value = itemIdx;
+            document.getElementById('s-time').value = item.time;
+            document.getElementById('s-title').value = item.title;
+            document.getElementById('s-desc').value = item.desc;
+            document.getElementById('btn-del-schedule').style.display = "block";
+            openModal('schedule');
+        }
+
+        function saveScheduleItem() {
+            const dIdx = document.getElementById('s-day-idx').value;
+            const iIdx = document.getElementById('s-item-idx').value;
+            const newItem = {
+                time: document.getElementById('s-time').value,
+                title: document.getElementById('s-title').value,
+                desc: document.getElementById('s-desc').value
+            };
+
+            if (iIdx == -1) {
+                scheduleData[dIdx].items.push(newItem);
+            } else {
+                scheduleData[dIdx].items[iIdx] = newItem;
+            }
+            renderSchedule();
+            closeModal();
+        }
+
+        function deleteScheduleItem() {
+            if(!confirm("確定要刪除此行程嗎？")) return;
+            const dIdx = document.getElementById('s-day-idx').value;
+            const iIdx = document.getElementById('s-item-idx').value;
+            scheduleData[dIdx].items.splice(iIdx, 1);
+            renderSchedule();
+            closeModal();
+        }
+
+        // --- 8. 行李與購物 (保留) ---
+        const DEFAULT_PACKING = {
+            "傑 (爸)": ["身分證/駕照", "現金/手機", "泳褲", "更換衣物"],
+            "文 (媽)": ["身分證/健保卡", "化妝品", "遮陽帽", "暈船藥"],
+            "心語 (8)": ["健保卡", "小背包", "泳裝", "薄外套"],
+            "宥程 (5)": ["健保卡", "晚安尿布", "挖沙工具", "防曬乳"],
+            "采妤 (1)": ["健保卡/手冊", "奶粉奶瓶", "尿布", "推車/背巾", "副食品"]
+        };
+        let packingData = JSON.parse(localStorage.getItem('trip_v6_pack')) || {};
+        if(Object.keys(packingData).length === 0) {
+            for(let p in DEFAULT_PACKING) { packingData[p] = DEFAULT_PACKING[p].map(t => ({ t: t, c: false })); }
+        }
+        
         function renderPack() {
             const tabsDiv = document.getElementById('pack-tabs');
             const contentDiv = document.getElementById('pack-content');
@@ -358,30 +496,57 @@
             }
             packingData[currentTab].forEach((item, idx) => {
                 contentDiv.innerHTML += `
-                    <div class="checklist-item ${item.c?'checked':''}">
+                    <div class="checklist-item">
                         <input type="checkbox" onchange="toggleP(${idx})" ${item.c?'checked':''}>
                         <span style="${item.c?'text-decoration:line-through;color:#ccc':''}">${item.t}</span>
                     </div>`;
             });
-            localStorage.setItem('trip_v55_pack', JSON.stringify(packingData));
+            localStorage.setItem('trip_v6_pack', JSON.stringify(packingData));
         }
         function toggleP(idx) { packingData[currentTab][idx].c = !packingData[currentTab][idx].c; renderPack(); }
 
-        // --- 購物 ---
         function addShopItem() {
             const n = document.getElementById('shop-name').value, p = document.getElementById('shop-price').value;
-            const list = JSON.parse(localStorage.getItem('trip_v55_s')) || [];
-            if(n && p) { list.push({ n, p: parseInt(p) }); localStorage.setItem('trip_v55_s', JSON.stringify(list)); }
+            const list = JSON.parse(localStorage.getItem('trip_v6_shop')) || [];
+            if(n && p) { list.push({ n, p: parseInt(p) }); localStorage.setItem('trip_v6_shop', JSON.stringify(list)); }
             document.getElementById('shop-name').value = ''; document.getElementById('shop-price').value = ''; renderS();
         }
         function renderS() {
-            const list = JSON.parse(localStorage.getItem('trip_v55_s')) || [];
+            const list = JSON.parse(localStorage.getItem('trip_v6_shop')) || [];
             let total = 0;
-            document.getElementById('shop-list').innerHTML = list.map(i => { total+=i.p; return `<div class="shop-item" style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee;"><span>${i.n}</span><b>$${i.p}</b></div>`; }).join('');
+            document.getElementById('shop-list').innerHTML = list.map(i => { total+=i.p; return `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee;"><span>${i.n}</span><b>$${i.p}</b></div>`; }).join('');
             document.getElementById('shop-total').innerText = total;
         }
 
-        loadWeather(); renderF(); renderH(); renderC(); renderPack(); renderS();
+        // --- 9. 天氣渲染 (3/20-3/23) ---
+        function renderWeather() {
+             // 模擬 3/20 起四天天氣
+             const wData = [
+                 {d: "3/20 (五)", t: "24°C", i: "fa-sun"},
+                 {d: "3/21 (六)", t: "25°C", i: "fa-cloud-sun"},
+                 {d: "3/22 (日)", t: "26°C", i: "fa-sun"},
+                 {d: "3/23 (一)", t: "25°C", i: "fa-cloud"}
+             ];
+             document.getElementById('weather-display').innerHTML = wData.map(w => `
+                <div style="min-width:80px; text-align:center; background:#f9f9f9; padding:8px; border-radius:10px; border:1px solid #eee;">
+                    <div style="font-size:0.7rem; color:#666;">${w.d}</div>
+                    <div style="font-size:1.2rem; color:var(--accent); margin:5px 0;"><i class="fa-solid ${w.i}"></i></div>
+                    <div style="font-weight:bold;">${w.t}</div>
+                </div>
+             `).join('');
+        }
+
+        // --- Init ---
+        // 若有儲存過航班，則顯示
+        if(localStorage.getItem('trip_v6_flight')) document.getElementById('flight-result-area').innerHTML = localStorage.getItem('trip_v6_flight');
+        
+        renderWeather();
+        renderHotel();
+        renderCar();
+        renderSchedule();
+        renderPack();
+        renderS();
+
     </script>
 </body>
 </html>
